@@ -14,7 +14,7 @@ from app.main import app
 
 client = TestClient(app)
 
-VALID_HEADERS = {"x-api-key": "test-api-key-12345"}
+VALID_HEADERS = {"x-api-key": "sporelink-dev-key"}
 VALID_PAYLOAD = {
     "device_id": "dev-001",
     "temperature": 25.0,
@@ -124,14 +124,38 @@ def test_negative_humidity_returns_422():
 # POST /telemetry
 # ------------------------------------------------------------------
 
-
 @patch("app.main.get_connection")
 def test_post_telemetry_success(mock_get_conn):
     """Valid telemetry is accepted and stored (201)."""
     conn, cursor = _mock_connection()
+
+    cursor.fetchone.return_value = (
+        1,
+        "dev-001",
+        25.0,
+        70.0,
+        400.0,
+        65.0,
+        datetime.now(timezone.utc),
+    )
+
     mock_get_conn.return_value = conn
 
-    response = client.post("/telemetry", headers=VALID_HEADERS, json=VALID_PAYLOAD)
+    response = client.post(
+        "/telemetry",
+        headers=VALID_HEADERS,
+        json=VALID_PAYLOAD,
+    )
+
+    assert response.status_code == 201
+
+    body = response.json()
+
+    assert body["status"] == "ok"
+    assert body["device_id"] == "dev-001"
+
+    cursor.execute.assert_called_once()
+    conn.commit.assert_called_once()
     assert response.status_code == 201
     body = response.json()
     assert body["status"] == "ok"
@@ -150,7 +174,15 @@ def test_get_latest_success(mock_get_conn):
     """Returns most recent reading for a device (200)."""
     now = datetime.now(timezone.utc)
     cursor = MagicMock()
-    cursor.fetchone.return_value = ("dev-001", 25.0, 70.0, 400.0, 65.0, now)
+    cursor.fetchone.return_value = (
+    1,
+    "dev-001",
+    25.0,
+    70.0,
+    400.0,
+    65.0,
+    now,
+)
     conn, cursor = _mock_connection(cursor)
     mock_get_conn.return_value = conn
 
@@ -184,9 +216,9 @@ def test_get_history_success(mock_get_conn):
     now = datetime.now(timezone.utc)
     cursor = MagicMock()
     cursor.fetchall.return_value = [
-        ("dev-001", 25.0, 70.0, 400.0, 65.0, now),
-        ("dev-001", 24.5, 71.0, 410.0, 64.0, now),
-    ]
+    (1, "dev-001", 25.0, 70.0, 400.0, 65.0, now),
+    (2, "dev-001", 24.5, 71.0, 410.0, 64.0, now),
+     ]
     conn, cursor = _mock_connection(cursor)
     mock_get_conn.return_value = conn
 

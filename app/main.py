@@ -152,26 +152,27 @@ async def api_key_middleware(
         return await call_next(request)
 
     # Read API key
+        # Read API key
     key = request.headers.get("x-api-key")
 
     # Validate API key
     if not key or key != API_KEY:
+        logger.warning(
+            "SECURITY_EVENT: Invalid API key attempt "
+            "method=%s path=%s client=%s",
+            request.method,
+            request.url.path,
+            request.client.host if request.client else "unknown",
+        )
 
-      logger.warning(
-        "SECURITY_EVENT: Invalid API key attempt "
-        "method=%s path=%s client=%s",
-        request.method,
-        request.url.path,
-        request.client.host if request.client else "unknown",
-    )
+        return JSONResponse(
+            status_code=401,
+            content={
+                "detail": "Missing or invalid API key"
+            },
+        )
 
-    return JSONResponse(
-        status_code=401,
-        content={
-            "detail": "Missing or invalid API key"
-        },
-    )
-
+    # Valid API key → continue to endpoint
     return await call_next(request)
 
 
