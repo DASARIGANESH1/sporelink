@@ -1,0 +1,48 @@
+# Version control
+.git
+.gitignore
+
+# Environment files (never bake secrets into image)
+.env
+.env.*
+
+# Python artifacts
+__pycache__
+*.pyc
+*.pyo
+.venv
+venv
+
+# Testing
+tests/
+.pytest_cache
+coverage/
+htmlcov/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Documentation & scripts
+README.md
+DEMO_SCRIPT.md
+AI_USAGE.md
+smoke_test.sh
+
+# Terraform
+.terraform/
+terraform/
+
+# CI/CD
+.github/
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Misc
+*.md
+*.log
+.DS_Store

@@ -1,0 +1,7 @@
+API_KEY=change-me
+
+POSTGRES_DB=sporelink
+POSTGRES_USER=sporelink
+POSTGRES_PASSWORD=change-me
+
+DATABASE_URL=postgresql://sporelink:change-me@postgres:5432/sporelink
